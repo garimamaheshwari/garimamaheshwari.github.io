@@ -1,0 +1,338 @@
+<html>
+<script src='https://d3js.org/d3.v5.min.js'></script>
+<style> circle {fill: lightblue; stroke: rgb(15, 8, 121);} </style>
+<style>
+    .chart rect { fill: steelblue;}
+    #tooltip {
+        opacity: 0;
+        position: absolute;
+        text-align: center;
+        width: 30px;
+        height: 20px;
+        background: white;
+        border: 0px;
+    }
+    h1{text-align: center;}
+    h3{text-align: center;}
+</style>
+
+<head>
+    <title> Car Data by Fuel </title>
+    <h1> Does Fuel Type Affect Car Mileage?</h1>
+    <h3> By Garima Maheshwari</h3>
+    <text> With gas prices on the rise and so many different car makes, models, and fuel types it can be hard to choose the right car.
+        Which vehicle fuel type will save you money in the long run? One that runs on Gasoline, Electricity, or Diesel?
+        Will buying a well known name brand such as BMW or Rollsroyce, help with car mileage in the long run?
+    </text>
+    <br>
+    <br>
+    <text>
+        The chart below defines the average car mileage for the city vs. highway for each car make and # of engine cylinders of each car relative to the size of each point on the graph.
+        By hovering over each point, you can also determine the car company it belongs to.
+    </text>
+    <br>
+</head>
+<body onload='init()' margin="auto">
+    <button class="fuel" type="button" onclick="init()">
+        All
+    </button>
+    <button class="fuel" type="button" onclick="GasolineData()">
+        Gasoline
+    </button>
+    <button class="fuel" type="button" onclick="ElectricData()">
+        Electric
+    </button>
+    <button class="fuel" type="button" onclick="DieselData()">
+        Diesel
+    </button>
+<svg width=500 height=500>
+</svg>
+
+<div id="tooltip"></div> </body>
+
+<script>
+async function init() {
+
+d3.select("svg").selectAll("*").remove();
+
+//load the data
+const data = await d3.csv("https://flunky.github.io/cars2017.csv");
+
+
+//create axes
+var scale = d3.scaleLog().domain([10,150]).range([0,400]);
+var scaley = d3.scaleLog().domain([10,150]).range([400,0]);
+
+
+svg = d3.select("svg")
+.attr("width", 400 + 2 * 50)
+.attr("height",400 + 2 * 50)
+
+
+var tooltip = d3.select("#tooltip");
+
+//used code from this stackoverflow post to create moving dots: https://stackoverflow.com/questions/22645162/d3-when-i-add-a-transition-my-mouseover-stops-working-why
+var dots = svg.append('g')
+    .attr("transform", "translate(" + 50 + "," + 50 + ")")
+    .selectAll("dot")
+        .data(data)
+        .enter()
+        .append("circle")
+        .attr("cx", 0)
+        .attr("cy", 400)
+        .attr("r", function(d) { return 2 + parseInt(d.EngineCylinders);})
+        .style('opacity', 0);
+
+
+    dots.transition().duration(3000).delay(1000)
+        .attr("cx", function(d) { return scale(d.AverageCityMPG);})
+        .attr("cy", function(d) { return 400 - scale(d.AverageHighwayMPG);})
+        .attr("r", function(d) { return 2 + parseInt(d.EngineCylinders);})
+        .style('opacity', 1);
+        
+    dots.on("mouseover", function(d,i){
+            tooltip.style("opacity", 1)
+                    .style("left", (d3.event.pageX) + "px")
+                    .style("top", (d3.event.pageY) + "px")
+                    .html(d.Make);
+        })
+        .on("mouseout", function(){ tooltip.style("opacity", 0)});
+
+var axis = d3.axisBottom(scale)
+        .tickValues([10, 20, 50, 100])
+        .tickFormat(d3.format("~s"));
+
+var axisLeft = d3.axisLeft(scaley)
+        .tickValues([10, 20, 50, 100]) 
+        .tickFormat(d3.format("~s"));
+
+
+svg.append("g")
+.attr("transform", "translate("+50+","+50+")")
+.call(axisLeft);
+
+svg.append("g")
+.attr("transform", "translate("+50+","+450+")")
+.call(axis);
+
+// Add X axis label:
+svg.append("text")
+    .attr("text-anchor", "end")
+    .attr("x", 330)
+    .attr("y", 485)
+    .text("Average Car Mileage (City)");
+
+svg.append("text")
+    .attr("text-anchor", "end")
+    .attr("transform", "rotate(-90)")
+    .attr("y", 20)
+    .attr("x", -125)
+    .text("Average Car Mileage (Highway)")
+
+}
+
+// function for diesel data:
+async function GasolineData() {
+
+svg.selectAll("*").remove();
+
+//load the data
+const data = await d3.csv("https://flunky.github.io/cars2017.csv");
+
+
+//create axes
+var scale = d3.scaleLog().domain([10,150]).range([0,400]);
+var scaley = d3.scaleLog().domain([10,150]).range([400,0]);
+
+
+svg = d3.select("svg")
+.attr("width", 400 + 2 * 50)
+.attr("height",400 + 2 * 50)
+
+var tooltip = d3.select("#tooltip");
+
+//used code from this stackoverflow post to create moving dots: https://stackoverflow.com/questions/22645162/d3-when-i-add-a-transition-my-mouseover-stops-working-why
+var dots = svg.append('g')
+    .attr("transform", "translate(" + 50 + "," + 50 + ")")
+    .selectAll("dot")
+        .data(data)
+        .enter()
+        .append("circle")
+        .filter(function(d) { return d.Fuel == "Gasoline" })
+        .attr("cx", 0)
+        .attr("cy", 400)
+        .attr("r", function(d) { return 2 + parseInt(d.EngineCylinders);})
+        .style('opacity', 0);
+
+
+    dots.transition().duration(3000).delay(1000)
+        .filter(function(d) { return d.Fuel == "Gasoline" })
+        .attr("cx", function(d) { return scale(d.AverageCityMPG);})
+        .attr("cy", function(d) { return 400 - scale(d.AverageHighwayMPG);})
+        .attr("r", function(d) { return 2 + parseInt(d.EngineCylinders);})
+        .style('opacity', 1);
+        
+    dots.on("mouseover", function(d,i){
+            tooltip.style("opacity", 1)
+                    .style("left", (d3.event.pageX) + "px")
+                    .style("top", (d3.event.pageY) + "px")
+                    .html(d.Make);
+        })
+        .on("mouseout", function(){ tooltip.style("opacity", 0)});
+
+var axis = d3.axisBottom(scale)
+        .tickValues([10, 20, 50, 100])
+        .tickFormat(d3.format("~s"));
+
+var axisLeft = d3.axisLeft(scaley)
+        .tickValues([10, 20, 50, 100]) 
+        .tickFormat(d3.format("~s"));
+
+
+svg.append("g")
+.attr("transform", "translate("+50+","+50+")")
+.call(axisLeft);
+
+svg.append("g")
+.attr("transform", "translate("+50+","+450+")")
+.call(axis);
+
+
+}
+
+async function ElectricData() {
+
+    svg.selectAll("*").remove();
+
+//load the data
+const data = await d3.csv("https://flunky.github.io/cars2017.csv");
+
+
+//create axes
+var scale = d3.scaleLog().domain([80,150]).range([0,400]);
+var scaley = d3.scaleLog().domain([80,150]).range([400,0]);
+
+
+svg = d3.select("svg")
+.attr("width", 400 + 2 * 50)
+.attr("height",400 + 2 * 50)
+
+var tooltip = d3.select("#tooltip");
+
+//used code from this stackoverflow post to create moving dots: https://stackoverflow.com/questions/22645162/d3-when-i-add-a-transition-my-mouseover-stops-working-why
+var dots = svg.append('g')
+    .attr("transform", "translate(" + 50 + "," + 50 + ")")
+    .selectAll("dot")
+        .data(data)
+        .enter()
+        .append("circle")
+        .filter(function(d) { return d.Fuel == "Electricity" })
+        .attr("cx", 0)
+        .attr("cy", 400)
+        .attr("r", function(d) { return 2 + parseInt(d.EngineCylinders);})
+        .style('opacity', 0);
+
+
+    dots.transition().duration(3000).delay(1000)
+        .filter(function(d) { return d.Fuel == "Electricity" })
+        .attr("cx", function(d) { return scale(d.AverageCityMPG);})
+        .attr("cy", function(d) { return 400 - scale(d.AverageHighwayMPG);})
+        .attr("r", function(d) { return 2 + parseInt(d.EngineCylinders);})
+        .style('opacity', 1);
+        
+    dots.on("mouseover", function(d,i){
+            tooltip.style("opacity", 1)
+                    .style("left", (d3.event.pageX) + "px")
+                    .style("top", (d3.event.pageY) + "px")
+                    .html(d.Make);
+        })
+        .on("mouseout", function(){ tooltip.style("opacity", 0)});
+
+var axis = d3.axisBottom(scale)
+        .tickValues([80, 90, 100, 110, 130, 150])
+        .tickFormat(d3.format("~s"));
+
+var axisLeft = d3.axisLeft(scaley)
+        .tickValues([80, 90, 100, 110, 130, 150]) 
+        .tickFormat(d3.format("~s"));
+
+
+svg.append("g")
+.attr("transform", "translate("+50+","+50+")")
+.call(axisLeft);
+
+svg.append("g")
+.attr("transform", "translate("+50+","+450+")")
+.call(axis);
+
+}
+
+async function DieselData() {
+
+    svg.selectAll("*").remove();
+
+//load the data
+const data = await d3.csv("https://flunky.github.io/cars2017.csv");
+
+
+//create axes
+var scale = d3.scaleLog().domain([20,50]).range([0,400]);
+var scaley = d3.scaleLog().domain([20,50]).range([400,0]);
+
+
+svg = d3.select("svg")
+.attr("width", 400 + 2 * 50)
+.attr("height",400 + 2 * 50)
+
+var tooltip = d3.select("#tooltip");
+
+//used code from this stackoverflow post to create moving dots: https://stackoverflow.com/questions/22645162/d3-when-i-add-a-transition-my-mouseover-stops-working-why
+var dots = svg.append('g')
+    .attr("transform", "translate(" + 50 + "," + 50 + ")")
+    .selectAll("dot")
+        .data(data)
+        .enter()
+        .append("circle")
+        .filter(function(d) { return d.Fuel == "Diesel" })
+        .attr("cx", 0)
+        .attr("cy", 400)
+        .attr("r", function(d) { return 2 + parseInt(d.EngineCylinders);})
+        .style('opacity', 0);
+
+
+    dots.transition().duration(3000).delay(1000)
+        .filter(function(d) { return d.Fuel == "Diesel" })
+        .attr("cx", function(d) { return scale(d.AverageCityMPG);})
+        .attr("cy", function(d) { return 400 - scale(d.AverageHighwayMPG);})
+        .attr("r", function(d) { return 2 + parseInt(d.EngineCylinders);})
+        .style('opacity', 1);
+        
+    dots.on("mouseover", function(d,i){
+            tooltip.style("opacity", 1)
+                    .style("left", (d3.event.pageX) + "px")
+                    .style("top", (d3.event.pageY) + "px")
+                    .html(d.Make);
+        })
+        .on("mouseout", function(){ tooltip.style("opacity", 0)});
+
+var axis = d3.axisBottom(scale)
+        .tickValues([20, 30, 40, 50])
+        .tickFormat(d3.format("~s"));
+
+var axisLeft = d3.axisLeft(scaley)
+        .tickValues([20, 30, 40, 50]) 
+        .tickFormat(d3.format("~s"));
+
+
+svg.append("g")
+.attr("transform", "translate("+50+","+50+")")
+.call(axisLeft);
+
+svg.append("g")
+.attr("transform", "translate("+50+","+450+")")
+.call(axis);
+
+}
+</script>
+</body>
+</html>
