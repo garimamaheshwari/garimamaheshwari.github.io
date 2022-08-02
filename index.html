@@ -199,6 +199,20 @@ svg.append("g")
 .attr("transform", "translate("+50+","+450+")")
 .call(axis);
 
+// Add X axis label:
+svg.append("text")
+    .attr("text-anchor", "end")
+    .attr("x", 330)
+    .attr("y", 485)
+    .text("Average Car Mileage (City)");
+
+svg.append("text")
+    .attr("text-anchor", "end")
+    .attr("transform", "rotate(-90)")
+    .attr("y", 20)
+    .attr("x", -125)
+    .text("Average Car Mileage (Highway)")
+
 
 }
 
@@ -267,6 +281,20 @@ svg.append("g")
 .attr("transform", "translate("+50+","+450+")")
 .call(axis);
 
+// Add X axis label:
+svg.append("text")
+    .attr("text-anchor", "end")
+    .attr("x", 330)
+    .attr("y", 485)
+    .text("Average Car Mileage (City)");
+
+svg.append("text")
+    .attr("text-anchor", "end")
+    .attr("transform", "rotate(-90)")
+    .attr("y", 20)
+    .attr("x", -125)
+    .text("Average Car Mileage (Highway)")
+
 }
 
 async function DieselData() {
@@ -333,6 +361,20 @@ svg.append("g")
 svg.append("g")
 .attr("transform", "translate("+50+","+450+")")
 .call(axis);
+
+// Add X axis label:
+svg.append("text")
+    .attr("text-anchor", "end")
+    .attr("x", 330)
+    .attr("y", 485)
+    .text("Average Car Mileage (City)");
+
+svg.append("text")
+    .attr("text-anchor", "end")
+    .attr("transform", "rotate(-90)")
+    .attr("y", 20)
+    .attr("x", -125)
+    .text("Average Car Mileage (Highway)")
 
 }
 </script>
